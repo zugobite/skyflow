@@ -1,0 +1,16 @@
+# Default owner for everything
+* @zasciahugo
+
+# Source code
+/src/ @zasciahugo
+
+# Database scripts
+/sql/ @zasciahugo
+
+# Documentation
+/docs/ @zasciahugo
+*.md @zasciahugo
+
+# Configuration
+/.github/ @zasciahugo
+.gitignore @zasciahugo
