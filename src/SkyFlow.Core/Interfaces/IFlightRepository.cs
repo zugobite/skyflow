@@ -28,6 +28,14 @@ public interface IFlightRepository
     Task<int> CreateAsync(Flight flight);
 
     /// <summary>
+    /// Creates a new flight along with its assigned aircraft.
+    /// </summary>
+    /// <param name="flight">The flight to create.</param>
+    /// <param name="aircraft">The aircraft to assign.</param>
+    /// <returns>The created flight's identifier.</returns>
+    Task<int> CreateFlightWithAircraftAsync(Flight flight, Aircraft aircraft);
+
+    /// <summary>
     /// Updates the status of a flight.
     /// </summary>
     /// <param name="flightId">The flight identifier.</param>

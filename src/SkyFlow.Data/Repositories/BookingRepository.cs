@@ -29,6 +29,25 @@ public class BookingRepository : IBookingRepository
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<dynamic>> GetManifestAsync(int flightId)
+    {
+        const string sql = @"
+            SELECT 
+                b.BookingId,
+                p.FullName,
+                p.PassportNumber,
+                b.SeatNumber,
+                b.Status
+            FROM Bookings b
+            INNER JOIN Passengers p ON b.PassengerId = p.PassengerId
+            WHERE b.FlightId = @FlightId
+            ORDER BY p.FullName";
+            
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync(sql, new { FlightId = flightId });
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<Booking>> GetByPassengerAsync(int passengerId)
     {
         const string sql = "SELECT * FROM Bookings WHERE PassengerId = @PassengerId";

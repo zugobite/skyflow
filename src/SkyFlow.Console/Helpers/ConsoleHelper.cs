@@ -21,7 +21,7 @@ public static class ConsoleHelper
           ███████║██║  ██╗   ██║   ██║     ███████╗╚██████╔╝╚███╔███╔╝           
           ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝            
           
-          Terminal Manager v0.1.0
+          Terminal Manager v0.2.0
 ");
         System.Console.ResetColor();
     }

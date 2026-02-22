@@ -58,6 +58,65 @@ public class FlightRepository : IFlightRepository
     }
 
     /// <inheritdoc />
+    public async Task<int> CreateFlightWithAircraftAsync(Flight flight, Aircraft aircraft)
+    {
+        using var connection = _context.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            // 1. Create Aircraft
+            const string aircraftSql = @"
+                INSERT INTO Aircraft (RegistrationNo, Model, Capacity)
+                VALUES (@RegistrationNo, @Model, @Capacity);
+                SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            
+            var aircraftId = await connection.QuerySingleAsync<int>(aircraftSql, new
+            {
+                aircraft.RegistrationNo,
+                aircraft.Model,
+                aircraft.Capacity
+            }, transaction);
+
+            // 2. Create Flight
+            const string flightSql = @"
+                INSERT INTO Flights (FlightNumber, OriginAirportId, DestinationAirportId, DepartureTime, Status, GateAgentId)
+                VALUES (@FlightNumber, @OriginAirportId, @DestinationAirportId, @DepartureTime, @Status, @GateAgentId);
+                SELECT CAST(SCOPE_IDENTITY() AS INT);";
+            
+            var flightId = await connection.QuerySingleAsync<int>(flightSql, new
+            {
+                flight.FlightNumber,
+                flight.OriginAirportId,
+                flight.DestinationAirportId,
+                flight.DepartureTime,
+                Status = flight.Status.ToString(),
+                flight.GateAgentId
+            }, transaction);
+
+            // 3. Create FlightAssignment
+            const string assignmentSql = @"
+                INSERT INTO FlightAssignments (FlightId, AircraftId)
+                VALUES (@FlightId, @AircraftId);";
+            
+            await connection.ExecuteAsync(assignmentSql, new
+            {
+                FlightId = flightId,
+                AircraftId = aircraftId
+            }, transaction);
+
+            transaction.Commit();
+            return flightId;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<bool> UpdateStatusAsync(int flightId, string status)
     {
         const string sql = "UPDATE Flights SET Status = @Status WHERE FlightId = @FlightId";

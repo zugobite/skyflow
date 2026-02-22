@@ -15,6 +15,13 @@ public interface IBookingRepository
     Task<IEnumerable<Booking>> GetByFlightAsync(int flightId);
 
     /// <summary>
+    /// Retrieves the flight manifest (bookings with passenger details).
+    /// </summary>
+    /// <param name="flightId">The flight identifier.</param>
+    /// <returns>A collection of manifest records.</returns>
+    Task<IEnumerable<dynamic>> GetManifestAsync(int flightId);
+
+    /// <summary>
     /// Retrieves all bookings for a given passenger.
     /// </summary>
     /// <param name="passengerId">The passenger identifier.</param>
