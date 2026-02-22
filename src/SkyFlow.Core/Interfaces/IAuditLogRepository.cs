@@ -15,6 +15,12 @@ public interface IAuditLogRepository
     Task<IEnumerable<AuditLog>> GetByUserAsync(int userId);
 
     /// <summary>
+    /// Retrieves all audit log entries.
+    /// </summary>
+    /// <returns>A collection of all audit log entries.</returns>
+    Task<IEnumerable<AuditLog>> GetAllAsync();
+
+    /// <summary>
     /// Creates a new audit log entry.
     /// </summary>
     /// <param name="auditLog">The audit log entry to create.</param>

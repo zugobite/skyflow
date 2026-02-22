@@ -54,7 +54,7 @@ public class Program
             {
                 case SkyFlow.Core.Models.Admin:
                     var adminDashboard = new AdminDashboard(
-                        flightRepository, userRepository, auditLogRepository);
+                        flightRepository, userRepository, auditLogRepository, notificationRepository);
                     await adminDashboard.RunAsync(user);
                     break;
 

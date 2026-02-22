@@ -15,10 +15,10 @@ GO
 -- Default password for all: Password123!
 -- ============================================
 INSERT INTO Users (Username, PasswordHash, Role, FullName, Email) VALUES
-('admin',       '$2a$11$K8Yf3qYx5E0Vb5nZ1wJ5aOqZD3jG7cL8mN9pR2sT4uV6wX8yZ0bC', 'Admin',     'Sarah Mitchell',   'sarah.mitchell@skyflow.co.za'),
-('admin2',      '$2a$11$K8Yf3qYx5E0Vb5nZ1wJ5aOqZD3jG7cL8mN9pR2sT4uV6wX8yZ0bC', 'Admin',     'James van der Berg','james.vdb@skyflow.co.za'),
-('gate.agent1', '$2a$11$K8Yf3qYx5E0Vb5nZ1wJ5aOqZD3jG7cL8mN9pR2sT4uV6wX8yZ0bC', 'GateAgent', 'Thandi Nkosi',     'thandi.nkosi@skyflow.co.za'),
-('gate.agent2', '$2a$11$K8Yf3qYx5E0Vb5nZ1wJ5aOqZD3jG7cL8mN9pR2sT4uV6wX8yZ0bC', 'GateAgent', 'David Botha',      'david.botha@skyflow.co.za');
+('admin',       '$2a$11$tolN577aa70zsLff2TYAQugUwlBcM5jbFuRp5Gq.oPqZ105Kwzox6', 'Admin',     'Sarah Mitchell',   'sarah.mitchell@skyflow.co.za'),
+('admin2',      '$2a$11$tolN577aa70zsLff2TYAQugUwlBcM5jbFuRp5Gq.oPqZ105Kwzox6', 'Admin',     'James van der Berg','james.vdb@skyflow.co.za'),
+('gate.agent1', '$2a$11$tolN577aa70zsLff2TYAQugUwlBcM5jbFuRp5Gq.oPqZ105Kwzox6', 'GateAgent', 'Thandi Nkosi',     'thandi.nkosi@skyflow.co.za'),
+('gate.agent2', '$2a$11$tolN577aa70zsLff2TYAQugUwlBcM5jbFuRp5Gq.oPqZ105Kwzox6', 'GateAgent', 'David Botha',      'david.botha@skyflow.co.za');
 GO
 
 -- ============================================

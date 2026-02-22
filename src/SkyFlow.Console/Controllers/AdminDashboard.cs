@@ -12,6 +12,7 @@ public class AdminDashboard
     private readonly IFlightRepository _flightRepository;
     private readonly IUserRepository _userRepository;
     private readonly IAuditLogRepository _auditLogRepository;
+    private readonly INotificationRepository _notificationRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AdminDashboard"/> class.
@@ -19,11 +20,13 @@ public class AdminDashboard
     public AdminDashboard(
         IFlightRepository flightRepository,
         IUserRepository userRepository,
-        IAuditLogRepository auditLogRepository)
+        IAuditLogRepository auditLogRepository,
+        INotificationRepository notificationRepository)
     {
         _flightRepository = flightRepository;
         _userRepository = userRepository;
         _auditLogRepository = auditLogRepository;
+        _notificationRepository = notificationRepository;
     }
 
     /// <summary>
@@ -40,6 +43,7 @@ public class AdminDashboard
                 "Manage Flights",
                 "System Oversight",
                 "Staff Management",
+                "View Audit Logs",
                 "Logout"
             });
 
@@ -55,11 +59,56 @@ public class AdminDashboard
                     await StaffManagementAsync(user);
                     break;
                 case 4:
+                    await ViewAuditLogsAsync();
+                    break;
+                case 5:
                     running = false;
                     ConsoleHelper.Info("Logging out...");
                     break;
             }
         }
+    }
+
+    private async Task ViewAuditLogsAsync()
+    {
+        ConsoleHelper.DisplayDivider("System Audit Logs");
+
+        try
+        {
+            var logs = await _auditLogRepository.GetAllAsync();
+            
+            var headers = new[] { "Log ID", "Timestamp", "User ID", "Action", "Entity", "Entity ID", "Details" };
+            var rows = new List<string[]>();
+
+            foreach (var log in logs)
+            {
+                rows.Add(new string[]
+                {
+                    log.AuditLogId.ToString(),
+                    log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    log.UserId.ToString(),
+                    log.Action,
+                    log.EntityType,
+                    log.EntityId.ToString(),
+                    log.Details ?? ""
+                });
+            }
+
+            if (rows.Count == 0)
+            {
+                ConsoleHelper.Info("No audit logs found.");
+            }
+            else
+            {
+                ConsoleTableEngine.Render(headers, rows);
+            }
+        }
+        catch (Exception ex)
+        {
+            ConsoleHelper.Error($"Failed to load audit logs: {ex.Message}");
+        }
+
+        ConsoleHelper.PressEnterToContinue();
     }
 
     private async Task ManageFlightsAsync(User admin)
@@ -88,6 +137,9 @@ public class AdminDashboard
         var capacityStr = ConsoleHelper.Prompt("Aircraft Capacity");
         if (!int.TryParse(capacityStr, out int capacity)) return;
 
+        var gateAgentIdStr = ConsoleHelper.Prompt("Assign Gate Agent ID (e.g., 3 or 4)");
+        if (!int.TryParse(gateAgentIdStr, out int gateAgentId)) return;
+
         var flight = new Flight
         {
             FlightNumber = flightNumber,
@@ -95,7 +147,7 @@ public class AdminDashboard
             DestinationAirportId = destId,
             DepartureTime = depTime,
             Status = SkyFlow.Core.Enums.FlightStatus.Scheduled,
-            GateAgentId = admin.UserId // Assigning admin as default gate agent for now
+            GateAgentId = gateAgentId
         };
 
         var aircraft = new Aircraft
@@ -116,6 +168,12 @@ public class AdminDashboard
                 EntityType = "Flight",
                 EntityId = flightId,
                 Details = $"Created flight {flightNumber} with aircraft {regNo}"
+            });
+
+            await _notificationRepository.CreateAsync(new Notification
+            {
+                UserId = gateAgentId,
+                Message = $"You have been assigned to a new flight: {flightNumber} departing at {depTime:yyyy-MM-dd HH:mm}."
             });
 
             ConsoleHelper.Success($"Flight {flightNumber} created successfully with ID {flightId}.");

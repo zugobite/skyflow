@@ -36,33 +36,64 @@ A modern, console-based airport and airline management system built with C# and 
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/) (LocalDB, Express, or full instance)
-- A terminal / command-line interface
+- **[.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)** or higher
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop)** (Recommended for database)
+- *Alternatively:* Local SQL Server instance
 
-### Installation
+### Cross-Platform Setup (Windows & macOS)
 
-```bash
-# Clone the repository
-git clone https://github.com/zasciahugo/skyflow.git
-cd skyflow
+The easiest way to get started is using Docker to host the SQL Server database. This ensures compatibility across Windows and macOS (including Apple Silicon).
 
-# Run the SQL seed scripts against your SQL Server instance
-sqlcmd -S localhost -i sql/001-create-database.sql
-sqlcmd -S localhost -d SkyFlowDB -i sql/002-create-tables.sql
-sqlcmd -S localhost -d SkyFlowDB -i sql/003-seed-data.sql
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/zugobite/skyflow.git
+    cd skyflow
+    ```
 
-# Update the connection string in appsettings.json
-# Edit src/SkyFlow.Console/appsettings.json with your SQL Server details
+2.  **Start the Database:**
+    We provide a `docker-compose.yml` that sets up SQL Server and automatically runs all seed scripts.
+    ```bash
+    docker compose up -d
+    ```
+    *Wait about 30 seconds for the database to start and the seed data to be applied.*
 
-# Build the solution
-dotnet build
+3.  **Run the Application:**
+    ```bash
+    dotnet run --project src/SkyFlow.Console
+    ```
 
-# Run the application
-dotnet run --project src/SkyFlow.Console
-```
+### OS-Specific Manual Setup
 
-The application will launch in your terminal.
+If you prefer not to use Docker, follow these manual steps:
+
+#### Windows (Local SQL Server)
+1.  Ensure SQL Server (Express or Developer) is running.
+2.  Open a terminal in the project root.
+3.  Run the SQL scripts in order using `sqlcmd`:
+    ```powershell
+    sqlcmd -S localhost -i sql/001-create-database.sql
+    sqlcmd -S localhost -d SkyFlowDB -i sql/002-create-tables.sql
+    sqlcmd -S localhost -d SkyFlowDB -i sql/003-seed-data.sql
+    ```
+4.  Update `src/SkyFlow.Console/appsettings.json` with your actual connection string.
+
+#### macOS (Manual without Docker)
+*Note: Microsoft SQL Server does not run natively on macOS. You must use Docker (see Cross-Platform Setup above) or connect to a remote instance.*
+
+### Default Login Credentials
+
+Use these credentials to log in and test the system:
+
+**Default Password:** `Password123!`
+
+| Role | Username | Permissions |
+| :--- | :--- | :--- |
+| **Admin** | `admin` | Full system access (manage staff, flight master table) |
+| **Admin** | `admin2` | Full system access |
+| **Gate Agent** | `gate.agent1` | Flight management, passenger check-in & boarding |
+| **Gate Agent** | `gate.agent2` | Flight management, passenger check-in & boarding |
+
+---
 
 ## Documentation
 
@@ -88,7 +119,8 @@ Extensive developer documentation is available in the [`docs/`](docs/) folder:
 | `1`    | Manage Flights   | Create flight schedules with aircraft assignments   |
 | `2`    | System Oversight | View master flight table with occupancy percentages |
 | `3`    | Staff Management | Add new gate agent accounts                         |
-| `4`    | Logout           | Return to login screen                              |
+| `4`    | View Audit Logs  | View system-wide audit logs                         |
+| `5`    | Logout           | Return to login screen                              |
 
 ### Gate Agent Actions
 
@@ -97,7 +129,8 @@ Extensive developer documentation is available in the [`docs/`](docs/) folder:
 | `1`    | Flight Manifest    | Select flight and view all registered passengers     |
 | `2`    | Passenger Check-in | Search by ID or passport, update status to CheckedIn |
 | `3`    | Boarding Gate      | Finalize flight, update statuses to Boarded/Departed |
-| `4`    | Logout             | Return to login screen                               |
+| `4`    | View Notifications | View unread notifications                            |
+| `5`    | Logout             | Return to login screen                               |
 
 ## Usage Examples
 

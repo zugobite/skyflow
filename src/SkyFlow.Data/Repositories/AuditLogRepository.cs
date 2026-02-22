@@ -29,6 +29,14 @@ public class AuditLogRepository : IAuditLogRepository
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<AuditLog>> GetAllAsync()
+    {
+        const string sql = "SELECT * FROM AuditLogs ORDER BY Timestamp DESC";
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<AuditLog>(sql);
+    }
+
+    /// <inheritdoc />
     public async Task<int> CreateAsync(AuditLog auditLog)
     {
         const string sql = @"

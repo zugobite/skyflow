@@ -23,6 +23,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2026-02-22
+
+### Added
+
+- **Docker Support:**
+  - Added `docker-compose.yml` for easy database setup.
+  - Added automated `sql-setup` container to initialize the database and seed data automatically.
+
+### Fixed
+
+- **Cross-Platform Compatibility:**
+  - Updated `docker-compose.yml` with `platform: linux/amd64` to support Apple Silicon (M1/M2/M3) chips.
+- **Authentication:**
+  - Regenerated BCrypt password hashes in `003-seed-data.sql` to fix login failures.
+  - Default password `Password123!` now works correctly for all seeded users.
+
+## [0.3.0] - 2026-02-22
+
+### Added
+
+- **Baggage Handling:**
+  - Added baggage prompt during passenger check-in in `GateAgentDashboard.cs`.
+  - Implemented `IBaggageRepository` to save baggage weight and generate a unique tag number.
+- **Notifications:**
+  - Added `View Notifications` menu option to `GateAgentDashboard.cs`.
+  - Implemented `INotificationRepository` to fetch unread notifications and mark them as read.
+  - Added logic to `AdminDashboard.cs` to automatically create a notification for the assigned Gate Agent when a new flight is created.
+- **Audit & Flight Logs:**
+  - Added `View Audit Logs` menu option to `AdminDashboard.cs`.
+  - Implemented `GetAllAsync` in `IAuditLogRepository` to view system-wide audit logs.
+  - Added `FlightLog` creation when a flight status changes in `GateAgentDashboard.cs`.
+- **Strict OOP Encapsulation:**
+  - Refactored `GateAgentDashboard.cs` to use `Flight.BeginBoarding()`, `Flight.DepartFlight()`, and `Flight.CancelFlight()` methods to enforce valid state transitions before saving to the database.
+
+### Changed
+
+- Updated `ConsoleHelper.cs` banner to display `v1.0.0`.
+
+### Fixed
+
+- Fixed `IAuditLogRepository` missing `GetAllAsync` method.
+
+---
+
 ## [0.2.0] - 2026-02-22
 
 ### Added
@@ -85,6 +129,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/zasciahugo/skyflow/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/zasciahugo/skyflow/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/zasciahugo/skyflow/releases/tag/v0.1.0
+[Unreleased]: https://github.com/zugobite/skyflow/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/zugobite/skyflow/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/zugobite/skyflow/releases/tag/v0.1.0

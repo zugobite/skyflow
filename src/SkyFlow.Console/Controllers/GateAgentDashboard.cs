@@ -52,6 +52,7 @@ public class GateAgentDashboard
                 "Flight Manifest",
                 "Passenger Check-in",
                 "Boarding Gate",
+                "View Notifications",
                 "Logout"
             });
 
@@ -67,11 +68,45 @@ public class GateAgentDashboard
                     await BoardingGateAsync(user);
                     break;
                 case 4:
+                    await ViewNotificationsAsync(user);
+                    break;
+                case 5:
                     running = false;
                     ConsoleHelper.Info("Logging out...");
                     break;
             }
         }
+    }
+
+    private async Task ViewNotificationsAsync(User agent)
+    {
+        ConsoleHelper.DisplayDivider("Your Notifications");
+
+        try
+        {
+            var allNotifications = await _notificationRepository.GetByUserAsync(agent.UserId);
+            var unreadNotifications = allNotifications.Where(n => !n.IsRead).ToList();
+
+            if (!unreadNotifications.Any())
+            {
+                ConsoleHelper.Info("You have no unread notifications.");
+            }
+            else
+            {
+                foreach (var notification in unreadNotifications)
+                {
+                    System.Console.WriteLine($"[{notification.CreatedAt:yyyy-MM-dd HH:mm}] {notification.Message}");
+                    await _notificationRepository.MarkAsReadAsync(notification.NotificationId);
+                }
+                ConsoleHelper.Success("All notifications marked as read.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ConsoleHelper.Error($"Failed to load notifications: {ex.Message}");
+        }
+
+        ConsoleHelper.PressEnterToContinue();
     }
 
     private async Task FlightManifestAsync()
@@ -161,6 +196,27 @@ public class GateAgentDashboard
 
             if (success)
             {
+                var hasBaggage = ConsoleHelper.Prompt("Does the passenger have checked baggage? (y/n)").ToLower() == "y";
+                if (hasBaggage)
+                {
+                    var weightStr = ConsoleHelper.Prompt("Enter baggage weight (kg)");
+                    if (decimal.TryParse(weightStr, out decimal weight))
+                    {
+                        var tagNumber = $"SF-{flightId}-{booking.BookingId}-{new Random().Next(1000, 9999)}";
+                        await _baggageRepository.CreateAsync(new Baggage
+                        {
+                            BookingId = booking.BookingId,
+                            Weight = weight,
+                            TagNumber = tagNumber
+                        });
+                        ConsoleHelper.Success($"Baggage checked in. Tag Number: {tagNumber}");
+                    }
+                    else
+                    {
+                        ConsoleHelper.Error("Invalid weight. Baggage not checked in.");
+                    }
+                }
+
                 await _auditLogRepository.CreateAsync(new AuditLog
                 {
                     UserId = agent.UserId,
@@ -210,6 +266,31 @@ public class GateAgentDashboard
             return;
         }
 
+        bool transitionSuccess = false;
+        switch (newStatus)
+        {
+            case SkyFlow.Core.Enums.FlightStatus.Boarding:
+                transitionSuccess = flight.BeginBoarding();
+                break;
+            case SkyFlow.Core.Enums.FlightStatus.Departed:
+                transitionSuccess = flight.DepartFlight();
+                break;
+            case SkyFlow.Core.Enums.FlightStatus.Cancelled:
+                transitionSuccess = flight.CancelFlight();
+                break;
+            default:
+                ConsoleHelper.Error("Cannot transition to this status manually.");
+                ConsoleHelper.PressEnterToContinue();
+                return;
+        }
+
+        if (!transitionSuccess)
+        {
+            ConsoleHelper.Error($"Invalid state transition from {flight.Status} to {newStatus}.");
+            ConsoleHelper.PressEnterToContinue();
+            return;
+        }
+
         try
         {
             var success = await _flightRepository.UpdateStatusAsync(flightId, newStatus.ToString());
@@ -220,7 +301,7 @@ public class GateAgentDashboard
                 {
                     FlightId = flightId,
                     Action = "StatusChanged",
-                    Details = $"Status changed from {flight.Status} to {newStatus}"
+                    Details = $"Status changed to {newStatus}"
                 });
 
                 await _auditLogRepository.CreateAsync(new AuditLog
@@ -236,7 +317,7 @@ public class GateAgentDashboard
             }
             else
             {
-                ConsoleHelper.Error("Failed to update flight status.");
+                ConsoleHelper.Error("Failed to update flight status in database.");
             }
         }
         catch (Exception ex)

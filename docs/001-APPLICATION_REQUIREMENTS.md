@@ -61,6 +61,7 @@ You are required to:
   operations.
 - Ensure all data persists after application restart.
 - Seed initial data via SQL scripts.
+- _Optional:_ Use Docker containers for database portability.
 
 ---
 

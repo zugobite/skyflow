@@ -1,16 +1,16 @@
 # Default owner for everything
-* @zasciahugo
+* @zugobite
 
 # Source code
-/src/ @zasciahugo
+/src/ @zugobite
 
 # Database scripts
-/sql/ @zasciahugo
+/sql/ @zugobite
 
 # Documentation
-/docs/ @zasciahugo
-*.md @zasciahugo
+/docs/ @zugobite
+*.md @zugobite
 
 # Configuration
-/.github/ @zasciahugo
-.gitignore @zasciahugo
+/.github/ @zugobite
+.gitignore @zugobite
